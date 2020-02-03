@@ -10,17 +10,23 @@ encode as structure using amino encoding and calculate SHA256, and truncate to
 As Amino encoding only implemented on Go, web service is needed to calculate addresses on other languages.
 
 
-## Running
+## Build
 
 ```
 go get github.com/tendermint/tendermint/crypto
 go get github.com/tendermint/tendermint/crypto/multisig
 go get github.com/tendermint/tendermint/crypto/secp256k1
 go build service.go
+```
+
+
+## Running
+
+```
  ./service -port=8080
 ```
 
-Commend line arguments are optional:
+Command line arguments are optional:
 
 - -port=port for service to listen
 - -bind=IP address to bind to ( default is ANY )
