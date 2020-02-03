@@ -1,7 +1,13 @@
-# tendermint-address
+# PubKeyMultisigThreshold tendermint address encoder
 
-Simple web service to encode tendermint addresses, for example, for 
+Simple web service to encode PubKeyMultisigThreshold tendermint addresses, for example, for 
 Cosmos blockchain.
+
+To calculate PubKeyMultisigThreshold address in Tendermint, need to get all public keys, 
+encode as structure using amino encoding and calculate SHA256, and truncate to 
+20 bytes.
+
+As Amino encoding only implemented on Go, web service is needed to calculate addresses on other languages.
 
 
 ## Running
