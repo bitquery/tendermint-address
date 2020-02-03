@@ -1,9 +1,14 @@
 package main
 
 import (
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/multisig"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"io"
 	"log"
 	"net/http"
@@ -16,7 +21,7 @@ type pubkey struct {
 }
 
 type value struct {
-	Threshold string   `json:"threshold"`
+	Threshold int      `json:"threshold,string"`
 	Pubkeys   []pubkey `json:"pubkeys"`
 }
 
@@ -30,9 +35,29 @@ type response struct {
 	Address string `json:"address,omitempty"`
 }
 
-func multisigAddress(request) (string, error) {
+func multisigAddress(request request) (string, string) {
 
-	return "qqq", nil
+	if request.Type != "tendermint/PubKeyMultisigThreshold" {
+		return "", "Unexpected signature type, PubKeyMultisigThreshold expected"
+	}
+
+	var pubkeys = make([]crypto.PubKey, len(request.Value.Pubkeys))
+	for index, element := range request.Value.Pubkeys {
+
+		if element.Type != "tendermint/PubKeySecp256k1" {
+			return "", "Unexpected signature type, tendermint/PubKeySecp256k1 expected"
+		}
+
+		data, _ := base64.StdEncoding.DecodeString(element.Value)
+		var bytes [33]byte
+		copy(bytes[:33], data)
+		pubkeys[index] = secp256k1.PubKeySecp256k1(bytes)
+
+	}
+
+	var msig = multisig.NewPubKeyMultisigThreshold(request.Value.Threshold, pubkeys)
+	var addr = msig.Address()
+	return hex.EncodeToString(addr.Bytes()), ""
 }
 
 func errorResponse(w http.ResponseWriter, message string) {
@@ -59,9 +84,9 @@ func multisigHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	address, err := multisigAddress(request)
-	if err != nil {
-		errorResponse(w, fmt.Sprintf("Error parsing request JSON: %s", err))
+	address, message := multisigAddress(request)
+	if message != "" {
+		errorResponse(w, fmt.Sprintf("Error parsing request JSON: %s", message))
 		return
 	}
 
