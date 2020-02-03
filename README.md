@@ -13,6 +13,9 @@ As Amino encoding only implemented on Go, web service is needed to calculate add
 ## Running
 
 ```
+go get github.com/tendermint/tendermint/crypto
+go get github.com/tendermint/tendermint/crypto/multisig
+go get github.com/tendermint/tendermint/crypto/secp256k1
 go build service.go
  ./service -port=8080
 ```
