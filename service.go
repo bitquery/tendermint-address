@@ -30,11 +30,12 @@ type response struct {
 	Address string `json:"address,omitempty"`
 }
 
-func multisigAddress(request) string {
-	return "qqq"
+func multisigAddress(request) (string, error) {
+
+	return "qqq", nil
 }
 
-func error(w http.ResponseWriter, message string) {
+func errorResponse(w http.ResponseWriter, message string) {
 	response := &response{
 		Error: message,
 	}
@@ -47,18 +48,23 @@ func multisigHandler(w http.ResponseWriter, req *http.Request) {
 	var pubkey, ok = req.URL.Query()["pubkey"]
 
 	if !ok || len(pubkey[0]) < 1 {
-		error(w, fmt.Sprintf("Query parameter pubkey not specified"))
+		errorResponse(w, fmt.Sprintf("Query parameter pubkey not specified"))
 		return
 	}
 
 	request := request{}
 	err := json.Unmarshal([]byte(pubkey[0]), &request)
 	if err != nil {
-		error(w, fmt.Sprintf("Error parsing request JSON: %s", err))
+		errorResponse(w, fmt.Sprintf("Error parsing request JSON: %s", err))
 		return
 	}
 
-	address := multisigAddress(request)
+	address, err := multisigAddress(request)
+	if err != nil {
+		errorResponse(w, fmt.Sprintf("Error parsing request JSON: %s", err))
+		return
+	}
+
 	response := &response{
 		Address: address,
 	}
