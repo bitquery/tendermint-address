@@ -22,7 +22,7 @@ COPY --from=builder /build/service /usr/local/bin/
 
 RUN apk add --no-cache curl net-tools iputils-ping bind-tools
 
-EXPOSE 26656 26657 1317 9090
+EXPOSE 8080
 
 USER 0
 
